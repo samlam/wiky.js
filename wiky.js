@@ -6,73 +6,96 @@
 
 var wiky = {
     options: {
-        'link-image': true //Preserve backward compat
+        'link-image': true, //Preserve backward compat
+        excerptMode : false
     }
 }
 
 
-wiky.process = function(wikitext, options) {
-    wiky.options = options || wiky.options;
+wiky.process = function (wikitext, options) {
+    options = $.extend({}, wiky.options, options);
 
-	var lines = wikitext.split(/\r?\n/);
-	
-	var html = "";
-	
-	for (i=0;i<lines.length;i++)
-	{
-		var line = lines[i];
-		if (line.match(/^===/)!=null && line.match(/===$/)!=null)
-		{
-			html += "<h2>"+line.substring(3,line.length-3)+"</h2>";
-		}
-		else if (line.match(/^==/)!=null && line.match(/==$/)!=null)
-		{
-			html += "<h3>"+line.substring(2,line.length-2)+"</h3>";
-		}
-		else if (line.match(/^:+/)!=null)
-		{
-			// find start line and ending line
-			start = i;
-			while (i < lines.length && lines[i].match(/^\:+/)!=null) i++;
-			i--;
-			
-			html += wiky.process_indent(lines,start,i);
-		}
-		else if (line.match(/^----+(\s*)$/)!=null)
-		{
-			html += "<hr/>";
-		}
-		else if (line.match(/^(\*+) /)!=null)
-		{
-			// find start line and ending line
-			start = i;
-			while (i < lines.length && lines[i].match(/^(\*+|\#\#+)\:? /)!=null) i++;
-			i--;
-			
-			html += wiky.process_bullet_point(lines,start,i);
-		}
-		else if (line.match(/^(\#+) /)!=null)
-		{
-			// find start line and ending line
-			start = i;
-			while (i < lines.length && lines[i].match(/^(\#+|\*\*+)\:? /)!=null) i++;
-			i--;
-			
-			html += wiky.process_bullet_point(lines,start,i);
-		}
-		else 
-		{
-			html += wiky.process_normal(line);
-		}
-		
-		html += "<br/>\n";
-	}
-	
-	return html;
+    var lines = wikitext.split(/\r?\n/);
+    var html = "";
+
+    var syntaxPrefix = '<script type="syntaxhighlighter" class="brush: %BRUSH%"><![CDATA[\r\n';
+    var syntaxSuffix = '\r\n]]></script>';
+    var syntaxCapturingBlock = false;
+    var syntaxLanguage = "js";
+    var syntaxBlock = [];
+
+    for (i = 0; i < lines.length; i++) {
+        line = lines[i];
+
+        ///let's detect & process syntax highlighter
+        if (line.match(/^\@\@/) != null) {
+            if (!syntaxCapturingBlock) {
+                //lets begin capture the code block
+                syntaxLanguage = $.trim(line.substring(2, line.length) ) || syntaxLanguage;
+                syntaxCapturingBlock = true;
+            } else {
+                //lets end capture and split out the syntaxHightlighter CDATA tag
+                var codeBlock = syntaxPrefix.replace("%BRUSH%", syntaxLanguage);
+                codeBlock += syntaxBlock.join('\r\n');
+                codeBlock += syntaxSuffix;
+                if (options.excerptMode) {
+                    html += '<span style="color:#888;">code snippets</span>';
+                } else {
+                    html += codeBlock;
+                }
+                syntaxBlock = [];
+                syntaxCapturingBlock = false;
+            }
+        }
+        else if (syntaxCapturingBlock) {
+            syntaxBlock.push(line);
+        }
+        else if (line.match(/^===/) != null && line.match(/===$/) != null) {
+            html += "<h2>" + line.substring(3, line.length - 3) + "</h2>";
+        }
+        else if (line.match(/^==/) != null && line.match(/==$/) != null) {
+            html += "<h3>" + line.substring(2, line.length - 2) + "</h3>";
+        }
+        else if (line.match(/^:+/) != null) {
+            // find start line and ending line
+            start = i;
+            while (i < lines.length && lines[i].match(/^\:+/) != null) i++;
+            i--;
+
+            html += wiky.process_indent(lines, start, i);
+        }
+        else if (line.match(/^----+(\s*)$/) != null) {
+            html += "<hr/>";
+        }
+        else if (line.match(/^(\*+) /) != null) {
+            // find start line and ending line
+            start = i;
+            while (i < lines.length && lines[i].match(/^(\*+|\#\#+)\:? /) != null) i++;
+            i--;
+
+            html += wiky.process_bullet_point(lines, start, i);
+        }
+        else if (line.match(/^(\#+) /) != null) {
+            // find start line and ending line
+            start = i;
+            while (i < lines.length && lines[i].match(/^(\#+|\*\*+)\:? /) != null) i++;
+            i--;
+
+            html += wiky.process_bullet_point(lines, start, i);
+        }
+        else if (line.length == 0) {
+            html += "<br/>\n";
+        }
+        else {
+            html += wiky.process_normal(line + "<br/>\n", options.excerptMode);
+        }
+    }
+
+    return html;
 }
 
 wiky.process_indent = function(lines,start,end) {
-	var i = start;
+    var i = start;
 	
 	var html = "<dl>";
 	
@@ -192,13 +215,13 @@ wiky.process_url = function(txt) {
 	var index = txt.indexOf(" "),
         url = txt,
         label = txt,
-        css = ' style="background: url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAFZJREFUeF59z4EJADEIQ1F36k7u5E7ZKXeUQPACJ3wK7UNokVxVk9kHnQH7bY9hbDyDhNXgjpRLqFlo4M2GgfyJHhjq8V4agfrgPQX3JtJQGbofmCHgA/nAKks+JAjFAAAAAElFTkSuQmCC\") no-repeat scroll right center transparent;padding-right: 13px;"';
+        css = '';
 	
 	if (index !== -1) {
 		url = txt.substring(0, index);
 		label = txt.substring(index + 1);
 	}
-	return '<a href="' + url + '"' + (wiky.options['link-image'] ? css : '') + '>' + label + '</a>';
+	return '<a href="' + url + '"' + (wiky.options['link-image'] ? css : '') + ' target="_blank">' + label + '</a>';
 };
 
 wiky.process_image = function(txt) {
@@ -216,23 +239,27 @@ wiky.process_image = function(txt) {
 	return "<img src='"+url+"' alt=\""+label+"\" />";
 }
 
-wiky.process_video = function(url) {
+wiky.process_video = function (url, excerptMode) {
+    var id = '';
+    if (url.match(/^(https?:\/\/)?(www.)?youtube.com\//) == null) {
+        return "<b>" + url + " is an invalid YouTube URL</b>";
+    }
 
-	if (url.match(/^(https?:\/\/)?(www.)?youtube.com\//) == null)
-	{
-		return "<b>"+url+" is an invalid YouTube URL</b>";
-	}
-	
-	if ((result = url.match(/^(https?:\/\/)?(www.)?youtube.com\/watch\?(.*)v=([^&]+)/)) != null)
-	{
-		url = "http://www.youtube.com/embed/"+result[4];
-	}
-	
-	
-	return '<iframe width="480" height="390" src="'+url+'" frameborder="0" allowfullscreen></iframe>';
+    if ((result = url.match(/^(https?:\/\/)?(www.)?youtube.com\/watch\?(.*)v=([^&]+)/)) != null) {
+        id = result[4];
+        url = "http://www.youtube.com/embed/" + id; //append the id
+    }
+
+    if (excerptMode) {
+        //return '<iframe width="220" height="75" src="' + url + '?wmode=transparent" frameborder="0" allowfullscreen></iframe>';
+        return '<div class="lite" id="' + id + '" style="width:230px;height:200px;" data-playwidth="230" data-playheight="200" data-minimode="'+ excerptMode +'"></div>'
+    } else {
+        //return '<iframe width="480" height="390" src="' + url + ' " frameborder="0" allowfullscreen></iframe>';
+        return '<div class="lite" id="' + id + '" style="width:480px;height:390px;" data-playwidth="480" data-playheight="390" data-minimode="'+ excerptMode +'"></div>'
+    }
 }
 
-wiky.process_normal = function(wikitext) {
+wiky.process_normal = function(wikitext, excerptMode) {
 	
 	// Image
 	{
@@ -256,7 +283,7 @@ wiky.process_normal = function(wikitext) {
 		while (index > -1 && end_index > -1) {
 			
 			wikitext = wikitext.substring(0,index) 
-						+ wiky.process_video(wikitext.substring(index+8,end_index)) 
+						+ wiky.process_video(wikitext.substring(index+8,end_index), excerptMode) 
 						+ wikitext.substring(end_index+2);
 		
 			index = wikitext.indexOf("[[Video:");
