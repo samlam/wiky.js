@@ -16,6 +16,9 @@ Please see index.html for an example.
 
 *wiky.js does not depend on jQuery, which is included for testing purpose.
 
+Demo
+-------------------
+https://c9.io/samlam/wiky_js/workspace/index.html
 
 
 Supported Syntax
