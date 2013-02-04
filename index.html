@@ -11,7 +11,7 @@
 	<link href="wiky.css" rel="stylesheet" type="text/css">
 	</head>
 	<body>
-		<textarea id="textarea" onchange="document.renderWiky();" cols="60" rows="20">
+		<textarea id="textarea" onchange="document.renderWiky()" cols="60" rows="20">
 
 === Heading ===
 Some content
@@ -62,8 +62,8 @@ This is '''bold''', '''''bold-italic''''', and ''italic''
     document.getYoutubePanel = function (callback) {
         if (!youtubePanelHelper){
             youtubePanelHelper = new YoutubePanel();
-            if (callback) callback(youtubePanelHelper);            
         } 
+        if (callback) callback(youtubePanelHelper);            
     };
     
     document.renderWiky = function(){
