@@ -9,14 +9,14 @@ body {
     text-shadow: #f6f6f6 1px 1px 0px;
 }
 
-div.wiky_preview_area.lite {
+div.lite {
     position: relative; left: 0; top: 0
 }
-.wiky_preview_area.lite {
+img.lite{
     opacity: .4;
 }
-.wiky_preview_area.lite:hover {
-    background-image:url(http://lh5.googleusercontent.com/-oBFjswrosz4/TuHqainRc3I/AAAAAAAAAbE/t3rMQuSJdLA/s800/youtube-play-button-hover.png);
+img.lite:hover {
+    background-image:url(https://lh5.googleusercontent.com/-oBFjswrosz4/TuHqainRc3I/AAAAAAAAAbE/t3rMQuSJdLA/s800/youtube-play-button-hover.png);
     background-size: 40px;
     opacity: 1;
 }

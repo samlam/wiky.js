@@ -1,0 +1,2 @@
+{"ts":1359938739276,"silentsave":true,"restoring":false,"patch":[[]],"length":0}
+{"contributors":[],"silentsave":false,"ts":1359938729587,"patch":[[{"diffs":[[1,"div.lite {\r\n    position: relative; left: 0; top: 0\r\n}\r\nimg.lite{\r\n    opacity: .4;\r\n}\r\nimg.lite:hover {\r\n    background-image:url(http://lh5.googleusercontent.com/-oBFjswrosz4/TuHqainRc3I/AAAAAAAAAbE/t3rMQuSJdLA/s800/youtube-play-button-hover.png);\r\n    background-size: 40px;\r\n    opacity: 1;\r\n}"]],"start1":0,"start2":0,"length1":0,"length2":297}]],"length":297,"saved":false}

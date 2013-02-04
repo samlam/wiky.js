@@ -2,13 +2,18 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<script type="text/javascript" src="jquery-1.4.2.min.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.10/backbone-min.js"></script>
+        <script type="text/javascript" src="youtubePanel/youtubePanel.js"></script>
 		<script type="text/javascript" src="wiky.js"></script>
-		<title>Untitled Document</title>
+		<title>wiky.js sample</title>
 	<link href="wiky.css" rel="stylesheet" type="text/css">
 	</head>
 	<body>
-		<textarea id="textarea" onchange="$('#preview').html(wiky.process($(this).val()));" cols="60" rows="20">=== Heading ===
+		<textarea id="textarea" onchange="document.renderWiky();" cols="60" rows="20">
+
+=== Heading ===
 Some content
 I would like to add another line
 
@@ -20,16 +25,16 @@ Some more lines1
 :: more
 :back to 1-indented line
 
-This is Taeyeon.
-[[File:http://www.oknation.net/blog/home/blog_data/12/2012/images/ty4.jpg Taeyeon]]
-Taeyeon is so cute.
+
+[[File:http://samuellam.files.wordpress.com/2013/02/steve-jobs-today-quotes-image-2.jpg?w=475 Steve Jobs]]
+
 
 This is a link:[http://www.google.com Google].
 This is a bold link:'''[http://www.google.com Google]'''.
 This is a bold-italic link:'''''[http://www.google.com Google]'''''.
 This is '''bold''', '''''bold-italic''''', and ''italic''
 
-[[Video:http://www.youtube.com/watch?v=ovVfLancwys]]
+[[Video:http://www.youtube.com/watch?v=F8UFGu2M2gM]]
 # First
 # secon
 ## Second-First
@@ -52,5 +57,23 @@ This is '''bold''', '''''bold-italic''''', and ''italic''
 	</body>
 </html>
 <script language="javascript">
-	$('#preview').html(wiky.process($('#textarea').val()));
+    var youtubePanelHelper = null;
+    
+    document.getYoutubePanel = function (callback) {
+        if (!youtubePanelHelper){
+            youtubePanelHelper = new YoutubePanel();
+            if (callback) callback(youtubePanelHelper);            
+        } 
+    };
+    
+    document.renderWiky = function(){
+        var buff = wiky.process($('#textarea').val());
+        document.getYoutubePanel(function(youtubePanel){
+            $('#preview').html(buff);
+            youtubePanel.render() ;
+        });
+    };
+    
+    document.renderWiky();
+    
 </script>
